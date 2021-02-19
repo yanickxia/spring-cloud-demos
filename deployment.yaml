@@ -1,0 +1,198 @@
+# eureka server
+apiVersion: v1
+kind: Service
+metadata:
+  name: eureka-server
+  labels:
+    app: eureka-server
+spec:
+  ports:
+    - port: 8761
+      name: http
+  selector:
+    app: eureka-server
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eureka-server
+  labels:
+    app: eureka-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eureka-server
+  template:
+    metadata:
+      labels:
+        app: eureka-server
+    spec:
+      containers:
+        - name: eureka-server
+          image:
+          imagePullPolicy: IfNotPresent #Always
+          ports:
+            - containerPort: 8761
+          resources:
+            limits:
+              cpu: "2"
+              memory: 4Gi
+---
+# eureka server client
+apiVersion: v1
+kind: Service
+metadata:
+  name: eureka-server-client
+  labels:
+    app: eureka-server-client
+spec:
+  ports:
+    - port: 8080
+      name: http
+  selector:
+    app: eureka-server-client
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eureka-server-client
+  labels:
+    app: eureka-server-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eureka-server-client
+  template:
+    metadata:
+      labels:
+        app: eureka-server-client
+    spec:
+      containers:
+        - name: eureka-server-client
+          image:
+          imagePullPolicy: IfNotPresent #Always
+          env:
+            - name: EUREKA_URL
+            - value: http://eureka-server:8761/eureka/
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: "2"
+              memory: 4Gi
+---
+# eureka server client feign
+apiVersion: v1
+kind: Service
+metadata:
+  name: eureka-server-feign-client
+  labels:
+    app: eureka-server-feign-client
+spec:
+  ports:
+    - port: 8080
+      name: http
+  selector:
+    app: eureka-server-feign-client
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eureka-server-feign-client
+  labels:
+    app: eureka-server-feign-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eureka-server-feign-client
+  template:
+    metadata:
+      labels:
+        app: eureka-server-feign-client
+    spec:
+      containers:
+        - name: eureka-server-feign-client
+          image:
+          imagePullPolicy: IfNotPresent #Always
+          env:
+            - name: EUREKA_URL
+            - value: http://eureka-server:8761/eureka/
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: "2"
+              memory: 4Gi
+---
+# echo web
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: echo-web
+  template:
+    metadata:
+      labels:
+        app: echo-web
+    spec:
+      containers:
+        - name: echo-web
+          image: ealen/echo-server
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: "1"
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo-web
+spec:
+  ports:
+    - name: http-echo
+      port: 80
+  selector:
+    app: echo-web
+---
+# netshoot for testing
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netshoot
+  labels:
+    app: netshoot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: netshoot
+  template:
+    metadata:
+      labels:
+        app: netshoot
+    spec:
+      containers:
+        - name: netshoot
+          image: nicolaka/netshoot
+          imagePullPolicy: IfNotPresent #Always
+          command: [ "/bin/bash", "-c", "--" ]
+          args: [ "while true; do sleep 30; done;" ]
+          resources:
+            limits:
+              cpu: "1"
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 128M

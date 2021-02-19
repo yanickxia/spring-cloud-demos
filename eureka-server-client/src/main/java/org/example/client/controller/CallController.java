@@ -23,11 +23,11 @@ public class CallController {
     }
 
     @RequestMapping("/call")
-    public String call(@RequestParam(value = "service",required = false,defaultValue = "eureka-service-feign-client") String service,
+    public String call(@RequestParam(value = "service", required = false, defaultValue = "eureka-service-feign-client") String service,
                        @RequestParam(value = "path", required = false, defaultValue = "/") String path,
                        @RequestParam(value = "method", required = false, defaultValue = "GET") String method) {
-        return restTemplate.execute(String.format("http://%s/%s", service, path), Objects.requireNonNull(HttpMethod.resolve(method)), null,
-                clientHttpResponse -> bodyString(clientHttpResponse.getBody()));
+
+        return restTemplate.exchange(String.format("http://%s%s", service, path), Objects.requireNonNull(HttpMethod.resolve(method)), null, String.class).getBody();
     }
 
     private String bodyString(InputStream inputStream) {

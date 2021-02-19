@@ -20,3 +20,20 @@ make run
 - [Eureka Server Feign Client](http://localhost:8082/)
   ![](https://cdn.jsdelivr.net/gh/yanickxia/picture-bed/20210208183654.png)
   
+
+### Case
+
+> eureka 是 ap 系统会延迟，测试可以在启动 1 分钟之后执行
+
+1. 从 feign-client 访问 client
+
+```bash
+# curl localhost:8082/call
+hello from client%
+```
+
+2. 从 client 访问 feign-client 
+```bash
+# curl localhost:8081/call
+hello from client%
+```
